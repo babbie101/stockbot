@@ -6,6 +6,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from data import fetch_ticker  # noqa: E402
+from strategy import generate_signal  # noqa: E402
 
 def run_trade(symbol: str = "AAPL") -> None:
     """Fetch live prices and print the generated signal for *symbol*."""
@@ -14,8 +15,8 @@ def run_trade(symbol: str = "AAPL") -> None:
         print(f"No data found for {symbol}.")
         return
     signal = generate_signal(symbol)
-    print(f"{symbol}: latest close={ticker_df.iloc[-1]['Close']}, "
-          f"previous close={ticker_df.iloc[-2]['Close'] if len(ticker_df) >= 2 else 'N/A'}, "
+    print(f"{symbol}: latest close={ticker_df.iloc[-1][symbol]}, "
+          f"previous close={ticker_df.iloc[-2][symbol] if len(ticker_df) >= 2 else 'N/A'}, "
           f"signal={signal}")
 
 

@@ -14,9 +14,9 @@ def generate_signal(symbol: str) -> str:
         return "HOLD"
     latest = ticker_df.iloc[-1]
     previous = ticker_df.iloc[-2]
-    if latest["Close"] > previous["Close"]:
+    if latest[symbol] > previous[symbol]:
         return "BUY"
-    elif latest["Close"] < previous["Close"]:
+    elif latest[symbol] < previous[symbol]:
         return "SELL"
     else:
         return "HOLD"
