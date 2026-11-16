@@ -1,22 +1,14 @@
-"""Rule-based signal engine: compare today's close vs yesterday's close."""
+import numpy as np
+import pandas as pd
 
-from data import fetch_ticker
+def add_indicators(df: pd.DataFrame) -> pd.DataFrame:#used to tell if a stck is dropping or falling 
+    data = df.copy()
+    data["SMA_20"] = data["Close"].rolling(window=20).mean()#SMA = simple moving average good for medium time holds
+    data["SMA_50"] = data["Close"].rolling(window=50).mean()
+    return data.dropna()
+    pass
 
-
-def generate_signal(symbol: str) -> str:
-    """
-    Return ``'BUY'`` if today's close > yesterday's close,
-    ``'SELL'`` if today's close < yesterday's close,
-    otherwise ``'HOLD'``.
-    """
-    ticker_df = fetch_ticker(symbol)
-    if len(ticker_df) < 2:
-        return "HOLD"
-    latest = ticker_df.iloc[-1]
-    previous = ticker_df.iloc[-2]
-    if latest[symbol] > previous[symbol]:
-        return "BUY"
-    elif latest[symbol] < previous[symbol]:
-        return "SELL"
-    else:
-        return "HOLD"
+def generate_signals(df: pd.DataFrame) -> pd.DataFrame:
+    data = df.copy()
+    data["Signal"] = (data["SMA_20"] > data["SMA_50"]) & (data["Close"] < data["Close"].shift(3))
+    return data
