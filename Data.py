@@ -8,6 +8,7 @@ import yfinance as yf
 
 CACHE_MAX_AGE = timedelta(hours=24)
 OHLCV_COLUMNS = ["Open", "High", "Low", "Close", "Volume"]
+# Starter liquidity and price filters; these are screening choices, not guarantees.
 MIN_AVERAGE_DAILY_VOLUME = 500_000
 MIN_CLOSE_PRICE = 5.0
 ATR_WINDOW = 14
@@ -77,6 +78,7 @@ def fetch_and_cache_data(
     now = datetime.now().timestamp()
     frames = {}
     download_symbols = []
+    # Cache files are scoped to the requested date range and refreshed after 24 hours.
     for symbol, file_path in cache_files.items():
         if (
             file_path.exists()
@@ -92,6 +94,7 @@ def fetch_and_cache_data(
             start=start.strftime("%Y-%m-%d"),
             end=end.strftime("%Y-%m-%d"),
             interval="1d",
+            # Adjust OHLC prices for splits and dividends for consistent comparisons.
             auto_adjust=True,
             group_by="ticker",
             progress=False,
@@ -143,6 +146,7 @@ def clean_stock_df(
         missing = ", ".join(sorted(missing_columns))
         raise ValueError(f"Stock data is missing required columns: {missing}")
 
+    # Exclude incomplete bars before calculating liquidity or selecting valid closes.
     clean = frame.dropna(subset=OHLCV_COLUMNS).copy()
     if clean.empty or clean["Volume"].mean() < min_average_daily_volume:
         return clean.iloc[0:0]
@@ -165,6 +169,7 @@ def add_base_features(
 
     featured = frame.copy()
     previous_close = featured["Close"].shift(1)
+    # True Range includes overnight gaps, not just the current day's high-low range.
     true_range = pd.concat(
         [
             featured["High"] - featured["Low"],
@@ -175,6 +180,7 @@ def add_base_features(
     ).max(axis=1)
 
     featured["Daily_Return"] = featured["Close"].pct_change()
+    # Require a full window so early, partial ATR values are not mistaken for full ATR.
     featured["ATR"] = true_range.rolling(
         window=atr_window,
         min_periods=atr_window,
@@ -197,6 +203,7 @@ def load_market_data(
     )
 
     market_data = {}
+    # Each ticker is filtered and featured independently; unusable histories are skipped.
     for symbol, frame in downloaded.items():
         clean = clean_stock_df(frame)
         if clean.empty:
