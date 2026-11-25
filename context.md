@@ -106,6 +106,19 @@ codebase/
 - [ ] Should we store signals in a CSV or database?
 - [ ] Is there a specific learning resource you prefer?
 
+## 7. Next Learning Steps
+
+Work through these in order, discussing the ideas and reviewing the relevant code before making each change. The goal is to understand the system, not just make it run.
+
+1. **Understand the current data pipeline:** Trace how the stock list is selected, how price data is downloaded and cached, how incomplete or illiquid data is filtered, and how daily returns and ATR are calculated. Keep in mind that the current universe is filtered from today's S&P 500 list, not all U.S. stocks.
+2. **Reconnect the existing pieces:** Compare the data pipeline's output with what the strategy and app expect. The current strategy/app interfaces do not yet match, so agree on the inputs and outputs before changing them. Learn what a DataFrame is and how each function passes data to the next.
+3. **Make tests repeatable:** Use sample data and mocks for tests so they do not depend on live prices or fixed BUY/SELL outcomes. Learn what each test proves and what it cannot prove.
+4. **Choose a simple strategy together:** Start with a clearly stated rule and explain its math in plain language. Treat it as a hypothesis to test, not a proven source of profit.
+5. **Learn backtesting and risk:** Simulate the strategy on historical data without looking ahead. Add transaction-cost assumptions, position sizing, and measures such as drawdown before judging results.
+6. **Build a local paper portfolio:** Only after the data, strategy, and backtest are understood, simulate cash, holdings, and trades. Broker paper trading can be considered later; real-money trading is not part of this learning plan.
+
+After each step, explain the concepts and code, run focused tests, record what was learned, and decide together whether to continue or revise the plan.
+
 ---
 
 *This file is living — update it as we progress.*
