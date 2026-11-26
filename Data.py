@@ -6,12 +6,14 @@ import pandas as pd
 import yfinance as yf
 
 
+# Shared settings
 CACHE_MAX_AGE = timedelta(hours=24)
 OHLCV_COLUMNS = ["Open", "High", "Low", "Close", "Volume"]
-# Starter liquidity and price filters; these are screening choices, not guarantees.
 MIN_AVERAGE_DAILY_VOLUME = 500_000
 MIN_CLOSE_PRICE = 5.0
 ATR_WINDOW = 14
+
+# These are starter screening choices, not guarantees or investment advice.
 EXCLUDED_SECTORS = {"Financials"}
 EXCLUDED_SUBINDUSTRIES = {
     "Aerospace & Defense",
@@ -22,6 +24,7 @@ EXCLUDED_SUBINDUSTRIES = {
 }
 
 
+# Stock universe
 def get_clean_tickers() -> list[str]:
     """Return S&P 500 tickers after excluding selected industries."""
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -54,6 +57,7 @@ def get_clean_tickers() -> list[str]:
     return tickers.dropna().loc[lambda values: values != ""].drop_duplicates().tolist()
 
 
+# Downloading and caching
 def fetch_and_cache_data(
     tickers: list[str],
     start_date: str,
@@ -135,6 +139,7 @@ def fetch_and_cache_data(
     return {symbol: frames[symbol] for symbol in symbols}
 
 
+# Cleaning and feature engineering
 def clean_stock_df(
     frame: pd.DataFrame,
     min_average_daily_volume: int = MIN_AVERAGE_DAILY_VOLUME,
@@ -188,6 +193,7 @@ def add_base_features(
     return featured.dropna(subset=["Daily_Return", "ATR"])
 
 
+# Complete market-data pipeline
 def load_market_data(
     start_date: str,
     end_date: str,
@@ -213,10 +219,13 @@ def load_market_data(
             market_data[symbol] = featured
 
     if not market_data:
-        raise ValueError("No usable market data remained after cleaning and feature calculation.")
+        raise ValueError(
+            "No usable market data remained after cleaning and feature calculation."
+        )
     return market_data
 
 
+# Older single-ticker helper, retained for the existing prototype.
 def fetch_ticker(symbol: str, period: str = "6mo") -> pd.DataFrame:
     """
     Return a DataFrame with daily close prices for `symbol`.
